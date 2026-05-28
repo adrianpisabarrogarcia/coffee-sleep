@@ -4,6 +4,8 @@ const { spawn } = require('child_process');
 
 // Windows: spawns PowerShell that calls SetThreadExecutionState(ES_CONTINUOUS |
 // ES_DISPLAY_REQUIRED | ES_SYSTEM_REQUIRED). State is held while the process lives.
+// The C# method handles the uint literal directly, avoiding PowerShell's
+// hex-to-Int32 parsing which turns 0x80000003 into a negative number before cast.
 const PS_SCRIPT = `
 Add-Type @"
 using System;
@@ -11,9 +13,12 @@ using System.Runtime.InteropServices;
 public class PowerMgmt {
     [DllImport("kernel32.dll")]
     public static extern uint SetThreadExecutionState(uint esFlags);
+    public static void PreventSleep() {
+        SetThreadExecutionState(0x80000003u);
+    }
 }
 "@
-[PowerMgmt]::SetThreadExecutionState([uint32]0x80000003) | Out-Null
+[PowerMgmt]::PreventSleep()
 Write-Host "ready"
 while (\$true) { Start-Sleep -Seconds 30 }
 `;
