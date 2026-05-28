@@ -1,6 +1,6 @@
 # coffee-sleep
 
-Mantiene la pantalla de tu computadora siempre encendida mientras el script está corriendo. Sin dependencias, sin instalación de paquetes.
+Mantiene la pantalla siempre encendida y el estado de Teams (u otros apps) en verde. Sin dependencias, sin instalación de paquetes.
 
 ## Requisitos
 
@@ -20,13 +20,28 @@ O con npm:
 npm start
 ```
 
-Para detenerlo, presioná **Ctrl+C**. La pantalla volverá al comportamiento normal automáticamente.
+Para detenerlo presioná **Ctrl+C**. La pantalla y el estado de Teams vuelven al comportamiento normal.
 
 ## Cómo funciona
 
+### Pantalla encendida
+
 | Sistema | Mecanismo |
 |---------|-----------|
-| Windows | Llama a `SetThreadExecutionState` vía PowerShell con los flags `ES_CONTINUOUS`, `ES_DISPLAY_REQUIRED` y `ES_SYSTEM_REQUIRED` |
-| macOS | Lanza `caffeinate -d -i -s` (display + idle + system sleep) |
+| Windows | `SetThreadExecutionState` vía PowerShell con flags `ES_CONTINUOUS`, `ES_DISPLAY_REQUIRED` y `ES_SYSTEM_REQUIRED` |
+| macOS | `caffeinate -d -i -s` (display + idle + system sleep) |
 
-En ambos casos, la pantalla se mantiene encendida mientras el proceso hijo está vivo. Al hacer Ctrl+C, el proceso se cierra y el sistema operativo restaura la configuración original — no hace falta ningún reset manual.
+### Teams en verde
+
+Teams tiene su propio timer de inactividad (~5 minutos), independiente del protector de pantalla del sistema. Cada 4 minutos el script simula una pulsación de teclado inocua para resetearlo:
+
+| Sistema | Mecanismo |
+|---------|-----------|
+| Windows | Toggle de ScrollLock vía `WScript.Shell` — sin permisos extra |
+| macOS | Tecla F15 vía `osascript` — requiere permiso de Accesibilidad |
+
+#### Permiso de Accesibilidad en macOS
+
+Si ves el aviso `"no se pudo simular teclado"`, otorgá el permiso manualmente:
+
+**Ajustes del sistema → Privacidad y Seguridad → Accesibilidad → agrega Terminal** (o la app desde donde corras el script).
