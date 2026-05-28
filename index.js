@@ -13,7 +13,7 @@ public class PowerMgmt {
     public static extern uint SetThreadExecutionState(uint esFlags);
 }
 "@
-[PowerMgmt]::SetThreadExecutionState(0x80000003) | Out-Null
+[PowerMgmt]::SetThreadExecutionState([uint32]0x80000003) | Out-Null
 Write-Host "ready"
 while (\$true) { Start-Sleep -Seconds 30 }
 `;
